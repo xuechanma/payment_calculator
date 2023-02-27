@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Payment Calculator</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+	<h1>Payment Calculator (Trip to Bari, 25-26 February 2023)</h1>
+
+	<form id="payment-form">
+		<h2>Payments</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Payment #</th>
+					<th>Payment Amount (€)</th>
+                    <th>Made By</th>
+                    <th>Item</th>
+					<th>Xuechan's share</th>
+					<th>Shuai's share</th>
+					<th>Ke's share</th>
+					<th>Yuting's share</th>
+
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="payment">
+					<td>1</td>
+					<td><input type="number" name="payment-1-amount" required></td>
+                    <td>
+                        <select name="payment-1-made-by" required>
+                            <option disabled selected value="">Select</option>
+                            <option value="person-1">Xuechan</option>
+                            <option value="person-2">Shuai</option>
+                            <option value="person-3">Ke</option>
+                            <option value="person-4">Yuting</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="item-1" required>
+                            <option disabled selected value="">Select</option>
+                            <option value="item-option-1">Hotel</option>
+                            <option value="item-option-2">Train</option>
+                            <option value="item-option-3">Restaurant</option>
+                            <option value="item-option-4">Bus</option>
+                            <option value="item-option-5">Other</option>
+                        </select>
+                    </td>
+					<td><input type="number" name="payment-1-person-1" value="0" required></td>
+					<td><input type="number" name="payment-1-person-2" value="0" required></td>
+					<td><input type="number" name="payment-1-person-3" value="0" required></td>
+					<td><input type="number" name="payment-1-person-4" value="0" required></td>
+				</tr>
+			</tbody>
+		</table>
+
+		<button type="button" id="add-payment-button">Add Payment</button>
+
+		<button type="submit" id="calculate-button">Calculate</button>
+	</form>
+
+	<div id="result"></div>
+
+	<script>
+		const addPaymentButton = document.getElementById('add-payment-button');
+		const paymentTableBody = document.querySelector('table tbody');
+		let paymentCount = 1;
+
+		addPaymentButton.addEventListener('click', () => {
+			paymentCount++;
+			const newRow = `
+				<tr class="payment">
+					<td>${paymentCount}</td>
+					<td><input type="number" name="payment-${paymentCount}-amount" required></td>
+                    <td>
+                        <select name="payment-${paymentCount}-made-by" required>
+                            <option disabled selected value="">Select</option>
+                            <option value="person-1">Xuechan</option>
+                            <option value="person-2">Shuai</option>
+                            <option value="person-3">Ke</option>
+                            <option value="person-4">Yuting</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="item-${paymentCount}" required>
+                            <option disabled selected value="">Select</option>
+                            <option value="item-option-1">Hotel</option>
+                            <option value="item-option-2">Train</option>
+                            <option value="item-option-3">Restaurant</option>
+                            <option value="item-option-4">Bus</option>
+                            <option value="item-option-5">Other</option>
+                        </select>
+                    </td>
+					<td><input type="number" name="payment-${paymentCount}-person-1" value="0" required></td>
+					<td><input type="number" name="payment-${paymentCount}-person-2" value="0" required></td>
+					<td><input type="number" name="payment-${paymentCount}-person-3" value="0" required></td>
+					<td><input type="number" name="payment-${paymentCount}-person-4" value="0" required></td>		
+				</tr>
+			`;
+			paymentTableBody.insertAdjacentHTML('beforeend', newRow);
+		});
+
+		const calculateButton = document.getElementById('calculate-button');
+		const resultDiv = document.getElementById('result');
+
+		calculateButton.addEventListener('click', (event) => {
+			event.preventDefault();
+
+			// Initialize variables
+			//let totalAmount = 0;
+			let p1Owes = 0;
+			let p2Owes = 0;
+			let p3Owes = 0;
+			let p4Owes = 0;
+            let p1Opaid = 0;
+			let p2Opaid = 0;
+			let p3Opaid = 0;
+			let p4Opaid = 0;
+		
+            // Loop through each payment row
+            const paymentRows = document.querySelectorAll('.payment');
+            paymentRows.forEach((row) => {
+                
+                const paymentAmount = Number(row.querySelector('input[name^="payment-"][name$="-amount"]').value);
+                //totalAmount += paymentAmount;
+
+                const madeBy = row.querySelector('select[name^="payment-"][name$="-made-by"]').value;
+
+                if (madeBy === `person-1`) {
+                        // Subtract the amount from the person who made the payment
+                        p1Opaid += paymentAmount;
+                } else if (madeBy === `person-2`) {
+                        p2Opaid += paymentAmount;
+                } else if (madeBy === `person-3`) {
+                        p3Opaid += paymentAmount;
+                } else if (madeBy === `person-4`) {
+                        p4Opaid += paymentAmount;
+                }
+
+                // Loop through each person column in the row
+                for (let i = 1; i <= 4; i++) {
+                    const personOwes = Number(row.querySelector(`input[name^="payment-"][name$="-person-${i}"]`).value);
+                    
+                    // if (madeBy === `person-${i}`) {
+                    //     // Subtract the amount from the person who made the payment
+                    //     personOwes -= paymentAmount;
+                    // }
+
+                    // Add the owed amount to the correct person
+                    if (i === 1) {
+                        p1Owes += personOwes;
+                    } else if (i === 2) {
+                        p2Owes += personOwes;
+                    } else if (i === 3) {
+                        p3Owes += personOwes;
+                    } else if (i === 4) {
+                        p4Owes += personOwes;
+                    }
+                }
+            });
+
+            // Display the results
+            const resultText = `
+                <h2>Results</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name #</th>
+                            <th>Already paid</th>
+                            <th>Total expenses</th>
+                            <th>Still need to pay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Xuechan</td>
+                            <td>€${p1Opaid.toFixed(2)}</td>
+                            <td>€${p1Owes.toFixed(2)}</td>
+                            <td>€${(p1Owes.toFixed(2) - p1Opaid.toFixed(2))}</td>
+                        </tr>
+                        <tr>
+                            <td>Shuai</td>
+                            <td>€${p2Opaid.toFixed(2)}</td>
+                            <td>€${p2Owes.toFixed(2)}</td>
+                            <td>€${(p2Owes.toFixed(2) - p2Opaid.toFixed(2))}</td>
+                        </tr>
+                        <tr>
+                            <td>Ke</td>
+                            <td>€${p3Opaid.toFixed(2)}</td>
+                            <td>€${p3Owes.toFixed(2)}</td>
+                            <td>€${(p3Owes.toFixed(2) - p3Opaid.toFixed(2))}</td>
+                        </tr>
+                        <tr>
+                            <td>Yuting</td>
+                            <td>€${p4Opaid.toFixed(2)}</td>
+                            <td>€${p4Owes.toFixed(2)}</td>
+                            <td>€${(p4Owes.toFixed(2) - p4Opaid.toFixed(2))}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            resultDiv.innerHTML = resultText;
+        });
+    </script>
+</body>
+</html>
